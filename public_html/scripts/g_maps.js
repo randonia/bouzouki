@@ -22,10 +22,35 @@ var styleArray = [
 ];
 
 var map;
-function initMap() {
+function init_map() {
+
+    // Add a bit of fun, provide random POI to start with
+    var rnd_poi = [
+	{lat: 51.9965, lng: 0.7428}
+    ]
     map = new google.maps.Map(document.getElementById('map'), {
-	center: {lat: -34.397, lng: 150.644},
-	zoom: 8,
+	center: rnd_poi[Math.floor(Math.random() * rnd_poi.length)],
+	zoom: 12,
 	styles: styleArray
     });
+
+    // Initialize some listeners for the map
+    map.addListener('dragend', on_map_drag_end);
+    map.addListener('zoom_changed', on_map_zoom_changed);
+}
+
+//
+// Event listener for the end of a map drag event
+//
+function on_map_drag_end()
+{
+    get_location_tweets(map.getCenter().lat(), map.getCenter().lng(), map.zoom, on_location_result);
+}
+
+//
+// Event listener for when the zoom of a map changes
+//
+function on_map_zoom_changed()
+{
+    console.log(map.zoom);
 }

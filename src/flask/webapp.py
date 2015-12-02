@@ -96,7 +96,8 @@ def parse_request_args(args):
     lat = args.get('lat', None)
     lon = args.get('lon', None)
     zoom = args.get('zoom', None)
-    return lat, lon, zoom
+    geo_hash = args.get('geo_hash', None)
+    return (lat, lon, zoom), geo_hash
 
 
 @app.route('/tweet_feed', methods=['GET'])
@@ -107,15 +108,21 @@ def get_tweet_feed():
     """
     hits = {}
     search_body = None
-    geo_params = parse_request_args(request.args)
-    if None not in geo_params:
-        lat, lon, zoom = map(float, geo_params)
+    geo_params, geo_hash = parse_request_args(request.args)
+    if None not in geo_params or geo_hash is not None:
+        geo = None
+        # prioritize the geo_hash if its passed in
+        if geo_hash is not None:
+            geo = geo_hash
+        else:
+            lat, lon, zoom = map(float, geo_params)
+            geo = geohash.encode(lat, lon, 5)
         search_body = {
             'query': {
                 'filtered': {
                     'filter': {
                         'geohash_cell': {
-                            'geo': geohash.encode(lat, lon, 5),
+                            'geo': geo,
                             'neighbors': True,
                             'precision': '5km'
                             }

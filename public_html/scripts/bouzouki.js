@@ -2,7 +2,7 @@
 // Upon successful request with some hits, populate the data in the
 // feed with some tweet elements which return sorted
 //
-function on_main_feed_success(data, status)
+function on_location_result(data)
 {
     // Alternate colors
     var bg_choices = ['bg-light', 'bg-dark'];
@@ -18,20 +18,14 @@ function on_main_feed_success(data, status)
 }
 
 //
-// Callback to populate pin data on the map
-//
-function on_location_result(response)
-{
-    console.log('Loc res', response);
-}
-
-//
 // Fetch location-specific tweets, given a pair of lat/lon coordinates and a zoom level.
 // The zoom level is in relation to the Google Maps
 //
 function get_location_tweets(lat, lon, zoom, callback)
 {
-    $.get(window.location.origin + '/api/tweet_feed?' + $.param({'lat':lat, 'lon': lon, 'zoom': zoom}, callback));
+    var params = $.param({'lat':lat, 'lon': lon, 'zoom': zoom});
+    var url = window.location.origin + '/api/tweet_feed?' + params;
+    $.get(url, callback);
 }
 
 // Load data for the main feed

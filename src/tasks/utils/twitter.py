@@ -15,7 +15,7 @@ class CoordinateIndexingStreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
         if status.coordinates:
-            lat, lon = status.coordinates['coordinates']
+            lon, lat = status.coordinates['coordinates']
             payload = {
                 'author': {
                     'avatar_url': status.author.profile_image_url,

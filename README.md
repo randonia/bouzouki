@@ -39,5 +39,7 @@
   * pip (and included `requirements.txt`)
   * RabbitMQ
   * jQuery 2.1.4 (download [here][1] and include in `public_html/scripts/`
+  * geohash-js (download [here][2] and include in `public_html/scripts/`
 
 [1]: http://code.jquery.com/jquery-2.1.4.js
+[2]: https://raw.githubusercontent.com/davetroy/geohash-js/master/geohash.js
