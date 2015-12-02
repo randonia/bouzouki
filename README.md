@@ -1,6 +1,9 @@
 # bouzouki
 
 ## Startup ##
+###`bouzouki` Configuration###
+  Copy the configuration files from `bouzouki/cfg` to `/etc/bouzouki`
+
 ###`bouzouki` services requirements:###
   _The following commands are implemented for a Debian based Linux machine, but
   can be translated accordingly_

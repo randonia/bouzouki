@@ -15,19 +15,10 @@ app = Celery('tasks',
              broker=CONFIG['broker'],
              include=['tasks.twitter_tasks'])
 
-# Set up the scheduled task to pull the feed
-schedule = {
-    'pull_twitter_feed': {
-        'task': 'tasks.twitter_tasks.task_pull_feed_from_twitter',
-        'schedule': timedelta(minutes=1),
-        'args': None
-    }
-}
 
-# Enforce a timeout
+# Set a non-timeout configuration
 app.conf.update(
-    CELERY_TASK_RESULT_EXPIRES=3600,
-    CELERYBEAT_SCHEDULE=schedule
+    CELERY_TASK_RESULT_EXPIRES=None
 )
 
 if __name__ == '__main__':

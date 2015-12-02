@@ -1,6 +1,8 @@
 # Celery ignores
 celerybeat-schedule
 
+# Binaries folder ignores
+bin/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
