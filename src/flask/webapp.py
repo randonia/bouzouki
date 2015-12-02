@@ -7,9 +7,14 @@ import json
 
 DEBUG = __name__ == '__main__'
 ES_CFG_PATH = '/etc/bouzouki/elasticsearch.json'
+ES_DOCUMENT_PATH = '/etc/bouzouki/es_documents.json'
 
 es_config_fp = open(ES_CFG_PATH, 'r')
 ES_CFG = json.load(es_config_fp)
+es_config_fp.close()
+es_document_fp = open(ES_DOCUMENT_PATH, 'r')
+ES_DOCUMENT = json.load(es_document_fp)
+es_document_fp.close()
 
 # Read in the configuration
 INDEX_TWEETS = ES_CFG['indices']['tweets']['name']
@@ -20,12 +25,24 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 
+def reset_application():
+    """
+    Only call this if debug is active!
+    """
+    if not DEBUG:
+        print 'Attempted to call reset without DEBUG set, aborting'
+        return
+    es = Elasticsearch()
+    es.indices.delete(index=INDEX_TWEETS, ignore=[404])
+    initialize_application()
+
+
 def initialize_application():
     """
     Initializes the application the first time a request is made
     """
     es = Elasticsearch()
-    es.indices.create(index=INDEX_TWEETS, ignore=400)
+    es.indices.create(index=INDEX_TWEETS, ignore=400, body=ES_DOCUMENT)
 
 
 def make_response(response):
@@ -72,11 +89,9 @@ def clear_all_indices():
     necessary cleanup and reinitialization steps
     """
     if DEBUG:
-        g.es.indices.delete(index=INDEX_TWEETS, ignore=[404])
-        initialize_application()
+        reset_application()
         return jsonify({'message': 'success'})
     abort(403)
-
 
 # *************
 # **End Views**
