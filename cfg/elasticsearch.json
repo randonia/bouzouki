@@ -1,0 +1,7 @@
+{
+    "indices": {
+        "tweets": {
+            "name": "tweets"
+        }
+    }
+}
