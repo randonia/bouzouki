@@ -26,7 +26,8 @@ function init_map() {
 
     // Add a bit of fun, provide random POI to start with
     var rnd_poi = [
-	{lat: 51.9965, lng: 0.7428}
+	{lat: 51.9965, lng: 0.7428},
+	{lat: -6.12348, lng: 106.65177}
     ]
     map = new google.maps.Map(document.getElementById('map'), {
 	center: rnd_poi[Math.floor(Math.random() * rnd_poi.length)],
@@ -37,6 +38,8 @@ function init_map() {
     // Initialize some listeners for the map
     map.addListener('dragend', on_map_drag_end);
     map.addListener('zoom_changed', on_map_zoom_changed);
+    // Force a first run of the update
+    on_map_drag_end();
 }
 
 //

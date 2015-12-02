@@ -6,6 +6,7 @@ function on_location_result(data)
 {
     // Alternate colors
     var bg_choices = ['bg-light', 'bg-dark'];
+    $('#feed-list').empty();
     for(var i = 0; i < data.hits.length; ++i)
     {
 	$('#feed-list').append('<li class="li-tweet ' + bg_choices[i % 2] + '">' +
