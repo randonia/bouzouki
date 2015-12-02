@@ -26,8 +26,18 @@
   $ cd bouzouki/src
   $ celery -A tasks.task_queue beat [-s /home/celery/var/run/celerybeat-schedule]
   ```
+  * Flask web service
+    * Can also be run as a wsgi application
+    * Serve Flask on `/api` and serve `boukouzi/public_html` with your web server
+  ```
+  $ cd bouzouki/src
+  $ python flask/webapp.py
+  ```
 
 ### Software Requirements ###
   * Python
   * pip (and included `requirements.txt`)
   * RabbitMQ
+  * jQuery 2.1.4 (download [here][1] and include in `public_html/scripts/`
+
+[1]: http://code.jquery.com/jquery-2.1.4.js

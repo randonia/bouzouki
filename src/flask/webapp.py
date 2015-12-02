@@ -1,5 +1,5 @@
 from elasticsearch import Elasticsearch
-
+from urlparse import urljoin
 from flask import (Flask, request, session, redirect, url_for, abort,
                    flash, jsonify, g)
 
@@ -45,16 +45,25 @@ def initialize_application():
     es.indices.create(index=INDEX_TWEETS, ignore=400, body=ES_DOCUMENT)
 
 
-def make_response(response):
+def make_response(response, **kwargs):
     result = {
-        '_links': make_links()
+        '_links': make_links(kwargs)
         }
     result.update(response)
     return jsonify(result)
 
 
-def make_links():
-    return {}
+def make_links(args):
+    url_path = request.url_root, 'api' + request.path
+    return {'self': {'href': url_path}}
+
+
+def build_hit(hit):
+    """
+    Call build_hit on a per-hit basis to normalize construction of a hit result
+    from elasticsearch
+    """
+    return hit['_source']
 
 # *************
 # *** Views ***
@@ -80,6 +89,17 @@ def request_setup():
 @app.route('/', methods=['GET'])
 def get_index():
     return make_response({})
+
+
+@app.route('/tweet_feed', methods=['GET'])
+def get_tweet_feed():
+    """
+    Tweet Feed just provides the 15 most recent tweets. Used primarily for
+    testing frontend results to prevent requiring any complex items
+    """
+    result = g.es.search(index='tweets', size=15, sort=['date:desc'])
+    hits = [build_hit(hit) for hit in result['hits']['hits']]
+    return make_response({'hits': hits})
 
 
 @app.route('/indices', methods=['DELETE'])
