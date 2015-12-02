@@ -38,6 +38,10 @@ function init_map() {
     // Initialize some listeners for the map
     map.addListener('dragend', on_map_drag_end);
     map.addListener('zoom_changed', on_map_zoom_changed);
+
+    // Give a global markers list for persistent marker storage
+    window.markers = [];
+
     // Force a first run of the update
     on_map_drag_end();
 }
