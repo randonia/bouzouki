@@ -47,5 +47,40 @@ function get_location_tweets(lat, lon, zoom, callback)
     $.get(url, callback);
 }
 
-// Load data for the main feed
-$.get(window.location.origin + '/api/tweet_feed', on_main_feed)
+//
+// When the form is submitted, make a request
+//
+function on_form_submit()
+{
+    var lat = $('#latitude').val();
+    var lon = $('#longitude').val();
+    var center_point = validate_coordinates(lat, lon);
+    if (center_point)
+    {
+	map_move_to_point(center_point);
+    }
+}
+
+//
+// Some basic validation on latitude/longitude
+//
+function validate_coordinates(lat, lon)
+{
+    lat = parseFloat(lat);
+    lon = parseFloat(lon);
+    // If we're passed in garbage, do nothing
+    if (isNaN(lat) || isNaN(lon))
+    {
+	return undefined;
+    }
+    return {'lat': lat, 'lng': lon};
+}
+
+//
+// Move the map to the point and update any tweets
+//
+function map_move_to_point(point)
+{
+    map.setCenter(point);
+    on_map_drag_end();
+}

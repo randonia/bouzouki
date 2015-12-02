@@ -42,7 +42,7 @@ body {
     position: absolute;
     top: 10px;
     right: 0px;
-    margin: 1px 10px 10px 10px;
+    margin: 30px 10px 10px 10px;
     padding: 2px 2px 2px 2px;
     overflow-y: scroll;
     height: 500px;
@@ -63,6 +63,10 @@ body {
 }
 
 .section-main {
+    margin-top: 10px;
+}
+
+.section-form {
     margin-top: 10px;
 }
 

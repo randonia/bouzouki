@@ -9,6 +9,13 @@
   <script type="text/javascript" src="scripts/bouzouki.js"></script>
 </head>
 <body>
+  <section class="section-form">
+    <form id="lat-lon-form" action="javascript:on_form_submit();">
+      <input type="text" id="latitude" />
+      <input type="text" id="longitude" />
+      <input type="submit" value="Go to location" />
+    </form>
+  </section>
   <section class="section-main">
     <div id="map" class="map"><img src="images/map_placeholder.PNG" width="700px"></img></div>
     <div id="feed" class="feed">
