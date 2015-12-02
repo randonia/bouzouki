@@ -1,4 +1,5 @@
 from elasticsearch import Elasticsearch
+from Geohash import geohash
 from urlparse import urljoin
 from flask import (Flask, request, session, redirect, url_for, abort,
                    flash, jsonify, g)
@@ -91,13 +92,39 @@ def get_index():
     return make_response({})
 
 
+def parse_request_args(args):
+    lat = args.get('lat', None)
+    lon = args.get('lon', None)
+    zoom = args.get('zoom', None)
+    return lat, lon, zoom
+
+
 @app.route('/tweet_feed', methods=['GET'])
 def get_tweet_feed():
     """
-    Tweet Feed just provides the 15 most recent tweets. Used primarily for
-    testing frontend results to prevent requiring any complex items
+    Tweet Feed just provides the 15 most recent tweets if no parameters are
+    passed in, otherwise provides locational tweets.
     """
-    result = g.es.search(index='tweets', size=15, sort=['date:desc'])
+    hits = {}
+    search_body = None
+    geo_params = parse_request_args(request.args)
+    if None not in geo_params:
+        lat, lon, zoom = map(float, geo_params)
+        search_body = {
+            'query': {
+                'filtered': {
+                    'filter': {
+                        'geohash_cell': {
+                            'geo': geohash.encode(lat, lon, 5),
+                            'neighbors': True,
+                            'precision': '5km'
+                            }
+                        }
+                    }
+                }
+            }
+    result = g.es.search(index='tweets', size=15, body=search_body,
+                         sort=['date:desc'])
     hits = [build_hit(hit) for hit in result['hits']['hits']]
     return make_response({'hits': hits})
 

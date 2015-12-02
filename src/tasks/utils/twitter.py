@@ -1,4 +1,5 @@
 from elasticsearch import Elasticsearch
+from Geohash import geohash
 import tweepy
 
 
@@ -10,18 +11,17 @@ class CoordinateIndexingStreamListener(tweepy.StreamListener):
     def __init__(self):
         super(CoordinateIndexingStreamListener, self).__init__()
         self.es = Elasticsearch()
+        self.PRECISION = 9
 
     def on_status(self, status):
         if status.coordinates:
+            lat, lon = status.coordinates['coordinates']
             payload = {
                 'author': {
                     'avatar_url': status.author.profile_image_url,
                     'name': status.author.name
                     },
-                'geo': {
-                    'lon': status.coordinates['coordinates'][0],
-                    'lat': status.coordinates['coordinates'][1]
-                },
+                'geo': geohash.encode(lat, lon, self.PRECISION),
                 'text': status.text,
                 'num_retweets': status.retweet_count,
                 'source_url': status.source_url,
