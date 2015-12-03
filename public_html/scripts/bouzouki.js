@@ -45,6 +45,7 @@ function on_location_result(data)
 	author_name.attr('class', 'p-tweet-name');
 	var author_link = $('<a>' + curr_hit.author.name + '</a>').appendTo(author_name);
 	author_link.attr('href', TWITTER_ACCOUNT_URL + curr_hit.author.handle);
+	author_link.attr('target', '_blank');
 	author_link.attr('class', 'a-username');
 	var tweet_text = $('<p>' + curr_hit.text + '</p>').appendTo(span);
 	var tweet_date_text = new Date(parseFloat(curr_hit.date)).toDateString();
@@ -52,6 +53,7 @@ function on_location_result(data)
 	var tweet_link = $('<a>' + tweet_date_text + '</a>').appendTo(tweet_link_container);
 	tweet_link.attr('class', 'a-tweet');
 	tweet_link.attr('href', TWITTER_ACCOUNT_URL + curr_hit.author.handle + '/status/' + curr_hit.id);
+	tweet_link.attr('target', '_blank');
 	// Make a marker
 	var geo_location = decodeGeoHash(curr_hit.geo);
 	var marker_pos = new google.maps.LatLng(geo_location.latitude[0], geo_location.longitude[0]);
