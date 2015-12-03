@@ -40,6 +40,7 @@ function init_map() {
 
     // Initialize some listeners for the map
     map.addListener('dragend', on_map_drag_end);
+    map.addListener('zoom_changed', on_map_zoom_change);
 
     // Give a global markers list for persistent marker storage
     window.markers = [];
@@ -58,4 +59,14 @@ function on_map_drag_end()
     get_location_tweets(lat, lon, on_location_result);
     $('#latitude').val(lat);
     $('#longitude').val(lon);
+}
+
+//
+// Event listener for the map zoom event
+//
+function on_map_zoom_change()
+{
+    var lat = map.getCenter().lat();
+    var lon = map.getCenter().lng();
+    get_location_tweets(lat, lon, on_location_result);
 }
