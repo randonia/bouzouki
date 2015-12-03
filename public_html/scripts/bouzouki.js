@@ -138,7 +138,8 @@ function get_location_tweets(lat, lon, callback)
     // Stringify the active tags to make life easier
     var hashtag_string = (window.active_tags) ? window.active_tags.toString() : '';
     var params = $.param({'lat':lat, 'lon': lon, 'precision': precision, 'hashtags': hashtag_string});
-    var url = window.location.origin + '/api/tweet_feed?' + params;
+    // Firefox Fix
+    var url = ((window.location.origin) ? window.location.origin : '') + '/api/tweet_feed?' + params;
     $.get(url, callback);
 }
 

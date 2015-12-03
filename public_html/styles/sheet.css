@@ -45,7 +45,9 @@ body {
     margin: 30px 10px 10px 10px;
     padding: 2px 2px 2px 2px;
     overflow-y: scroll;
-    height: 650px;
+    height: 570px;
+    height: calc(100% - 50px);
+    width: 300px;
     width: calc(100% - 700px - 20px);
 }
 
