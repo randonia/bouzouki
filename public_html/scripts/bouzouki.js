@@ -20,6 +20,7 @@ function on_location_result(data)
     // Alternate colors
     var bg_choices = ['bg-light', 'bg-dark'];
 
+    var TWITTER_ACCOUNT_URL = 'https://twitter.com/';
     // clear out all the old data
     $('#feed-list').empty();
     for(var i = window.markers.length - 1; i >= 0; --i)
@@ -35,14 +36,22 @@ function on_location_result(data)
 	var icon_root = 'images/icon';
 	var icon_image_url = icon_root + String.fromCharCode(65 + i) +'.png';
 
-	$('#feed-list').append('<li class="li-tweet ' + bg_choices[i % 2] + '">' +
-			       '<img src="' + icon_image_url +'"></img>' +
-			       '<img src="' + curr_hit.author.avatar_url +'"></img>' +
-			       '<span class="span-tweet"><p class="p-tweet">' + curr_hit.author.name + '</p>' +
-			       '<p>' + curr_hit.text + '</p>' +
-			       '</span>' +
-			       '</li>');
-
+	// Construct the DOM element for a tweet
+	var li = $('<li>', {class:  'li-tweet ' + bg_choices[i % 2]}).appendTo('#feed-list');
+	li.append($('<img>', {src: icon_image_url}));
+	li.append($('<img>', {src: curr_hit.author.avatar_url}));
+	var span = $('<span>', {class: 'span-tweet'}).appendTo(li);
+	var author_name = $('<p>').appendTo(span);
+	author_name.attr('class', 'p-tweet-name');
+	var author_link = $('<a>' + curr_hit.author.name + '</a>').appendTo(author_name);
+	author_link.attr('href', TWITTER_ACCOUNT_URL + curr_hit.author.handle);
+	author_link.attr('class', 'a-username');
+	var tweet_text = $('<p>' + curr_hit.text + '</p>').appendTo(span);
+	var tweet_date_text = new Date(parseFloat(curr_hit.date)).toDateString();
+	var tweet_link_container = $('<p>', {class: 'p-tweet-link-container'}).appendTo(span);
+	var tweet_link = $('<a>' + tweet_date_text + '</a>').appendTo(tweet_link_container);
+	tweet_link.attr('class', 'a-tweet');
+	tweet_link.attr('href', TWITTER_ACCOUNT_URL + curr_hit.author.handle + '/status/' + curr_hit.id);
 	// Make a marker
 	var geo_location = decodeGeoHash(curr_hit.geo);
 	var marker_pos = new google.maps.LatLng(geo_location.latitude[0], geo_location.longitude[0]);

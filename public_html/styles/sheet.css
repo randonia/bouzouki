@@ -56,15 +56,29 @@ body {
 
 .li-tweet {
     border: 1px solid rgba(100, 100, 100, 0.5);
+    color: #E6E6E6;
+}
 
+.a-username {
+    color: white;
+}
+
+.a-tweet {
+    font-size: 0.8em;
+    color: #ccc;
+}
+
+.p-tweet-link-container {
+    text-align: right;
 }
 
 .span-tweet {
     padding-left: 3px;
 }
 
-.p-tweet {
+.p-tweet-name {
     display: inline;
+    font-weight: bold;
 }
 
 .section-main {

@@ -16,16 +16,20 @@ class CoordinateIndexingStreamListener(tweepy.StreamListener):
     def on_status(self, status):
         if status.coordinates:
             lon, lat = status.coordinates['coordinates']
+            author = status.author
             payload = {
                 'author': {
-                    'avatar_url': status.author.profile_image_url,
-                    'name': status.author.name
+                    'avatar_url': author.profile_image_url,
+                    'name': author.name,
+                    'handle': author.screen_name,
+                    'profile_text_color': author.profile_text_color,
+                    'profile_background_color': author.profile_background_color
                     },
                 'geo': geohash.encode(lat, lon, self.PRECISION),
                 'text': status.text,
                 'num_retweets': status.retweet_count,
                 'source_url': status.source_url,
-                'id': status.id,
+                'id': status.id_str,
                 'date': status.timestamp_ms
             }
             self.es.index(index='tweets', doc_type='tweets', body=payload)
