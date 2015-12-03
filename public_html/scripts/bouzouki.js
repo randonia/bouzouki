@@ -154,6 +154,7 @@ function on_hashtag_form_reset()
 {
     window.active_tags = [];
     $('#hashtags').val('');
+    on_map_drag_end();
 }
 
 //
