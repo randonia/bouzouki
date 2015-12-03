@@ -23,7 +23,9 @@ function on_location_result(data)
     for(var i = window.markers.length - 1; i >= 0; --i)
     {
 	window.markers[i].setMap(null);
+	google.maps.event.clearListeners(window.markers[i]);
     }
+    window.markers.length = 0;
 
     // Iterate over each response and create an element
     for(var i = 0; i < data.hits.length; ++i)
@@ -62,7 +64,8 @@ function create_tweet_element(curr_hit, index)
     var icon_image_url = icon_root + icon_id +'.png';
 
     // Construct the DOM element for a tweet
-    var li = $('<li>', {class:  'li-tweet ' + BACKGROUND_CHOICES[index % 2]}).appendTo('#feed-list');
+    var li = $('<li>', {class:  'li-tweet ' + BACKGROUND_CHOICES[index % 2],
+			id: 'tweet_' + index}).appendTo('#feed-list');
     li.append($('<img>', {src: icon_image_url}));
     li.append($('<img>', {src: curr_hit.author.avatar_url}));
     var span = $('<span>', {class: 'span-tweet'}).appendTo(li);
@@ -85,10 +88,25 @@ function create_tweet_element(curr_hit, index)
     var marker_pos = new google.maps.LatLng(geo_location.latitude[0], geo_location.longitude[0]);
     var new_marker = new google.maps.Marker({
 	position: marker_pos,
-	title: index,
-	icon: icon_image_url
+	title: '' + index,
+	icon: icon_image_url,
     });
     new_marker.setMap(map);
+    // Make it so the tweets scroll to themselves in the feed when clicked on the map
+    new_marker.addListener('click', function(event){
+	// If we're not highlighted already, show this in the feed
+	var curr_pos = $('#tweet_' + index).position().top;
+	if (curr_pos != 0)
+	{
+	    // Iterate through every tweet
+	    var total_pos = 0;
+	    for(var i = 0; i < index; ++i)
+	    {
+		total_pos += $('#tweet_'+i).height();
+	    };
+	    $('#feed').scrollTop(total_pos);
+	}
+    });
     window.markers.push(new_marker);
 }
 
