@@ -1,9 +1,22 @@
+
+var center_marker;
+
 //
 // Upon successful request with some hits, populate the data in the
 // feed with some tweet elements which return sorted
 //
 function on_location_result(data)
 {
+    if (!center_marker)
+    {
+	center_marker = new google.maps.Marker({
+	    icon: 'images/arrow.png'
+	});
+    }
+    center_marker.setMap(undefined);
+    center_marker.setPosition(map.getCenter());
+    center_marker.setMap(map);
+
     // Alternate colors
     var bg_choices = ['bg-light', 'bg-dark'];
 
@@ -17,8 +30,14 @@ function on_location_result(data)
     {
 	// Keep some code clean
 	var curr_hit = data.hits[i];
+	// Should use Google's map url, but it's safer to load from our own host
+	//var icon_root = 'http://maps.google.com/mapfiles/kml/paddle/';
+	var icon_root = 'images/icon';
+	var icon_image_url = icon_root + String.fromCharCode(65 + i) +'.png';
+
 	$('#feed-list').append('<li class="li-tweet ' + bg_choices[i % 2] + '">' +
-			       '<img src="' + curr_hit.author.avatar_url+'"></img>' +
+			       '<img src="' + icon_image_url +'"></img>' +
+			       '<img src="' + curr_hit.author.avatar_url +'"></img>' +
 			       '<span class="span-tweet"><p class="p-tweet">' + curr_hit.author.name + '</p>' +
 			       '<p>' + curr_hit.text + '</p>' +
 			       '</span>' +
@@ -29,7 +48,8 @@ function on_location_result(data)
 	var marker_pos = new google.maps.LatLng(geo_location.latitude[0], geo_location.longitude[0]);
 	var new_marker = new google.maps.Marker({
 	    position: marker_pos,
-	    title: i
+	    title: i,
+	    icon: icon_image_url
 	});
 	new_marker.setMap(map);
 	window.markers.push(new_marker);
