@@ -49,6 +49,11 @@ body {
     width: calc(100% - 700px - 20px);
 }
 
+.lat-lon-form {
+    color: white;
+    padding-left: 15px;
+}
+
 .li-tweet {
     border: 1px solid rgba(100, 100, 100, 0.5);
 
