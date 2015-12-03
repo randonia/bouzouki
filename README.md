@@ -33,6 +33,7 @@
   $ cd bouzouki/src
   $ python flask/webapp.py
   ```
+  * [Elasticsearch][3] (requires Java)
 
 ### Software Requirements ###
   * Python
@@ -43,3 +44,4 @@
 
 [1]: http://code.jquery.com/jquery-2.1.4.js
 [2]: https://raw.githubusercontent.com/davetroy/geohash-js/master/geohash.js
+[3]: https://www.elastic.co/downloads/elasticsearch

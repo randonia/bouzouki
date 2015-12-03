@@ -1,0 +1,22 @@
+{
+  "mappings": {
+    "tweets": {
+      "_all":           { "enabled": "False"},
+      "_ttl":		{ "enabled": "True", "default": "30d"},
+      "properties":{
+        "author":{
+	  "properties": {
+	    "name":       {"type": "string"},
+	    "avatar_url": {"type": "string"}
+	    }
+	},
+        "geo":          {"type": "geo_point", "getohash": true, "geohash_prefix": "True", "geohash_precision": "9"},
+        "text":         {"type": "string"},
+        "num_retweets": {"type": "integer"},
+        "source_url":   {"type": "string"},
+        "id":           {"type": "string"},
+        "date":         {"type": "date"}
+      }
+    }
+  }
+}

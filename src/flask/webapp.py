@@ -47,16 +47,7 @@ def initialize_application():
 
 
 def make_response(response, **kwargs):
-    result = {
-        '_links': make_links(kwargs)
-        }
-    result.update(response)
-    return jsonify(result)
-
-
-def make_links(args):
-    url_path = request.url_root, 'api' + request.path
-    return {'self': {'href': url_path}}
+    return jsonify(response)
 
 
 def build_hit(hit):
