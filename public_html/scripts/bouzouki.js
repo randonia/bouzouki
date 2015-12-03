@@ -7,6 +7,7 @@ var center_marker;
 //
 function on_location_result(data)
 {
+    var start_time = +new Date();
     if (!center_marker)
     {
 	center_marker = new google.maps.Marker({
@@ -17,60 +18,78 @@ function on_location_result(data)
     center_marker.setPosition(map.getCenter());
     center_marker.setMap(map);
 
-    // Alternate colors
-    var bg_choices = ['bg-light', 'bg-dark'];
-
-    var TWITTER_ACCOUNT_URL = 'https://twitter.com/';
     // clear out all the old data
     $('#feed-list').empty();
     for(var i = window.markers.length - 1; i >= 0; --i)
     {
 	window.markers[i].setMap(null);
     }
+
+    // Iterate over each response and create an element
     for(var i = 0; i < data.hits.length; ++i)
     {
 	// Keep some code clean
-	var curr_hit = data.hits[i];
-	// Should use Google's map url, but it's safer to load from our own host
-	//var icon_root = 'http://maps.google.com/mapfiles/kml/paddle/';
-	var icon_root = 'images/icon';
-	// Prevent too many large pins from being displayed
-	var icon_id = ((i <= 25) ? String.fromCharCode(65 + i) : '_none');
-	var icon_image_url = icon_root + icon_id +'.png';
-
-	// Construct the DOM element for a tweet
-	var li = $('<li>', {class:  'li-tweet ' + bg_choices[i % 2]}).appendTo('#feed-list');
-	li.append($('<img>', {src: icon_image_url}));
-	li.append($('<img>', {src: curr_hit.author.avatar_url}));
-	var span = $('<span>', {class: 'span-tweet'}).appendTo(li);
-	var author_name = $('<p>').appendTo(span);
-	author_name.attr('class', 'p-tweet-name');
-	var author_link = $('<a>' + curr_hit.author.name + '</a>').appendTo(author_name);
-	author_link.attr('href', TWITTER_ACCOUNT_URL + curr_hit.author.handle);
-	author_link.attr('target', '_blank');
-	author_link.attr('class', 'a-username');
-	var tweet_text = $('<p>' + curr_hit.text + '</p>').appendTo(span);
-	var tweet_date_text = new Date(parseFloat(curr_hit.date)).toDateString();
-	var tweet_link_container = $('<p>', {class: 'p-tweet-link-container'}).appendTo(span);
-	var tweet_link = $('<a>' + tweet_date_text + '</a>').appendTo(tweet_link_container);
-	tweet_link.attr('class', 'a-tweet');
-	tweet_link.attr('href', TWITTER_ACCOUNT_URL + curr_hit.author.handle + '/status/' + curr_hit.id);
-	tweet_link.attr('target', '_blank');
-	// Make a marker
-	var geo_location = decodeGeoHash(curr_hit.geo);
-	var marker_pos = new google.maps.LatLng(geo_location.latitude[0], geo_location.longitude[0]);
-	var new_marker = new google.maps.Marker({
-	    position: marker_pos,
-	    title: i,
-	    icon: icon_image_url
-	});
-	new_marker.setMap(map);
-	window.markers.push(new_marker);
-
-	// Update the footer text
-	$('#footer').empty();
-	$('#footer').append('Took ' + data['_took'] + 'ms');
+	create_tweet_element(data.hits[i], i);
     }
+    
+    var end_time = +new Date();
+    // Update the footer text
+    $('#footer').empty();
+    $('#footer').append('Took ' + data['_took'] + 'ms for the request and ' +
+			(end_time - start_time) + 'ms creating ' + data.hits.length + ' nodes');
+
+    // Push the feed window to the top
+    $('#feed').scrollTop(0);
+}
+
+
+// For lack of a config file
+// Alternate colors
+var BACKGROUND_CHOICES = ['bg-light', 'bg-dark'];
+var TWITTER_ACCOUNT_URL = 'https://twitter.com/';
+
+//
+// Buils a DOM element using the data contained in a hit.
+//
+function create_tweet_element(curr_hit, index)
+{
+
+    // Should use Google's map url, but it's safer to load from our own host
+    //var icon_root = 'http://maps.google.com/mapfiles/kml/paddle/';
+    var icon_root = 'images/icon';
+    // Prevent too many large pins from being displayed
+    var icon_id = ((index <= 25) ? String.fromCharCode(65 + index) : '_none');
+    var icon_image_url = icon_root + icon_id +'.png';
+
+    // Construct the DOM element for a tweet
+    var li = $('<li>', {class:  'li-tweet ' + BACKGROUND_CHOICES[index % 2]}).appendTo('#feed-list');
+    li.append($('<img>', {src: icon_image_url}));
+    li.append($('<img>', {src: curr_hit.author.avatar_url}));
+    var span = $('<span>', {class: 'span-tweet'}).appendTo(li);
+    var author_name = $('<p>').appendTo(span);
+    author_name.attr('class', 'p-tweet-name');
+    var author_link = $('<a>' + curr_hit.author.name + '</a>').appendTo(author_name);
+    author_link.attr('href', TWITTER_ACCOUNT_URL + curr_hit.author.handle);
+    author_link.attr('target', '_blank');
+    author_link.attr('class', 'a-username');
+    var tweet_text = $('<p>' + curr_hit.text + '</p>').appendTo(span);
+    var tweet_date_text = new Date(parseFloat(curr_hit.date)).toDateString();
+    var tweet_link_container = $('<p>', {class: 'p-tweet-link-container'}).appendTo(span);
+    var tweet_link = $('<a>' + tweet_date_text + '</a>').appendTo(tweet_link_container);
+    tweet_link.attr('class', 'a-tweet');
+    tweet_link.attr('href', TWITTER_ACCOUNT_URL + curr_hit.author.handle + '/status/' + curr_hit.id);
+    tweet_link.attr('target', '_blank');
+    // Make a marker
+    // These should be pooled instead of new'd
+    var geo_location = decodeGeoHash(curr_hit.geo);
+    var marker_pos = new google.maps.LatLng(geo_location.latitude[0], geo_location.longitude[0]);
+    var new_marker = new google.maps.Marker({
+	position: marker_pos,
+	title: index,
+	icon: icon_image_url
+    });
+    new_marker.setMap(map);
+    window.markers.push(new_marker);
 }
 
 //
