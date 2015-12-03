@@ -71,9 +71,28 @@ function on_location_result(data)
 // Fetch location-specific tweets, given a pair of lat/lon coordinates and a zoom level.
 // The zoom level is in relation to the Google Maps
 //
-function get_location_tweets(lat, lon, zoom, callback)
+function get_location_tweets(lat, lon, callback)
 {
-    var params = $.param({'lat':lat, 'lon': lon, 'zoom': zoom});
+    var bounds = map.getBounds();
+    var precision = undefined;
+    if (bounds)
+    {	
+	// Get estimated precision of the current boundaries of the map
+	var top_right = bounds.getNorthEast();
+	var bottom_left = bounds.getSouthWest();
+	// Calculate the "monitor distance" to get a rough estimate of how precise we should be
+	var window_height = top_right.lat() - bottom_left.lat();
+	var window_width = top_right.lng() - bottom_left.lng();
+	var precision_value = window_width * 0.5;
+	// Wyoming is 360 miles wide and 280 miles tall. Wyoming roughly fills the screen at
+	// precision level 4.6. Therefore, at 1.0 precision level we are covering roughly:
+	//  78miles wide x 60miles tall, or 124.8km x 96km
+	// End result is multiplying our precision value by 120km to get a rough radius
+	precision = precision_value * 120;
+    }
+    // Default to 30km
+    precision = Math.round((precision) ? precision : 30);
+    var params = $.param({'lat':lat, 'lon': lon, 'precision': precision});
     var url = window.location.origin + '/api/tweet_feed?' + params;
     $.get(url, callback);
 }

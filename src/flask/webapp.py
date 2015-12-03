@@ -95,9 +95,9 @@ def get_index():
 def parse_request_args(args):
     lat = args.get('lat', None)
     lon = args.get('lon', None)
-    zoom = args.get('zoom', None)
+    precision = args.get('precision', None)
     geo_hash = args.get('geo_hash', None)
-    return (lat, lon, zoom), geo_hash
+    return (lat, lon, precision), geo_hash
 
 
 @app.route('/tweet_feed', methods=['GET'])
@@ -111,27 +111,38 @@ def get_tweet_feed():
     geo_params, geo_hash = parse_request_args(request.args)
     if None not in geo_params or geo_hash is not None:
         geo = None
+        precision = None
         # prioritize the geo_hash if its passed in
         if geo_hash is not None:
             geo = geo_hash
         else:
-            lat, lon, zoom = map(float, geo_params)
+            lat, lon, precision = map(float, geo_params)
+            precision = '%skm' % int(precision)
             geo = geohash.encode(lat, lon, 5)
         search_body = {
             'query': {
                 'filtered': {
                     'filter': {
-                        'geohash_cell': {
+                        'geo_distance': {
                             'geo': geo,
                             'neighbors': True,
-                            'precision': 4
+                            'distance': precision
                             }
                         }
                     }
-                }
+                },
+            'sort': [
+                {
+                    '_geo_distance': {
+                        'geo': geo,
+                        'order': 'asc',
+                        'unit': 'km',
+                        'distance_type': 'plane'
+                        }
+                    }
+                ]
             }
-    result = g.es.search(index='tweets', size=15, body=search_body,
-                         sort=['date:desc'])
+    result = g.es.search(index='tweets', size=15, body=search_body)
     hits = [build_hit(hit) for hit in result['hits']['hits']]
     return make_response({'hits': hits})
 

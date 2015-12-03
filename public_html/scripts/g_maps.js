@@ -50,5 +50,5 @@ function init_map() {
 //
 function on_map_drag_end()
 {
-    get_location_tweets(map.getCenter().lat(), map.getCenter().lng(), map.zoom, on_location_result);
+    get_location_tweets(map.getCenter().lat(), map.getCenter().lng(), on_location_result);
 }
