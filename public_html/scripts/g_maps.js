@@ -53,5 +53,9 @@ function init_map() {
 //
 function on_map_drag_end()
 {
-    get_location_tweets(map.getCenter().lat(), map.getCenter().lng(), on_location_result);
+    var lat = map.getCenter().lat();
+    var lon = map.getCenter().lng();
+    get_location_tweets(lat, lon, on_location_result);
+    $('#latitude').val(lat);
+    $('#longitude').val(lon);
 }
