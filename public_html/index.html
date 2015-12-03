@@ -10,11 +10,20 @@
 </head>
 <body>
   <section class="section-form">
-    <form id="lat-lon-form" class="lat-lon-form" action="javascript:on_form_submit();">
-      Latitude: <input type="text" id="latitude" />
-      Longitude: <input type="text" id="longitude" />
-      <input type="submit" value="Go to location" />
-    </form>
+    <div id="lat-lon-div">
+      <form id="lat-lon-form" class="lat-lon-form" action="javascript:on_lat_lon_form_submit();">
+	Latitude: <input type="text" id="latitude" />
+	Longitude: <input type="text" id="longitude" />
+	<input type="submit" value="Go to location" />
+      </form>
+    </div>
+    <div id="hashtag-div" style="padding-top:10px">
+      <form id="hashtag-search-form" class="lat-lon-form" action="javascript:on_hashtag_form_submit();">
+	Enter hashtags to search:<input type="text" id="hashtags" />
+	<input type="submit" value="Filter #hashtags" />
+	<input type="reset" value="Clear Filter" onClick="javascript:on_hashtag_form_reset();"/>
+      </form>
+    </div>
   </section>
   <section class="section-main">
     <div id="map" class="map"><img src="images/map_placeholder.PNG" width="700px"></img></div>

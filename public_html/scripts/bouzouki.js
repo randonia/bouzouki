@@ -98,7 +98,9 @@ function get_location_tweets(lat, lon, callback)
     }
     // Default to 30km
     precision = Math.round((precision) ? precision : 30);
-    var params = $.param({'lat':lat, 'lon': lon, 'precision': precision});
+    // Stringify the active tags to make life easier
+    var hashtag_string = (window.active_tags) ? window.active_tags.toString() : '';
+    var params = $.param({'lat':lat, 'lon': lon, 'precision': precision, 'hashtags': hashtag_string});
     var url = window.location.origin + '/api/tweet_feed?' + params;
     $.get(url, callback);
 }
@@ -106,7 +108,7 @@ function get_location_tweets(lat, lon, callback)
 //
 // When the form is submitted, make a request
 //
-function on_form_submit()
+function on_lat_lon_form_submit()
 {
     var lat = $('#latitude').val();
     var lon = $('#longitude').val();
@@ -115,6 +117,43 @@ function on_form_submit()
     {
 	map_move_to_point(center_point);
     }
+}
+
+//
+// When a hashtag is inserted and submitted, it will live in the query as long
+// as it is not cleared
+//
+function on_hashtag_form_submit(){
+    var tags_to_search = $('#hashtags').val()
+	.split(/[\s,]/)
+	.map(trim)
+	.filter(is_hashtag);
+
+    window.active_tags = tags_to_search;
+    on_map_drag_end();
+}
+
+//
+// Helper for map function - call on string
+//
+function trim(val){
+    return val.trim();
+}
+
+//
+// Helper for filter function - detects if it is a hashtag
+//
+function is_hashtag(val){
+    return val.length > 0 && val.startsWith('#');
+}
+
+//
+// Reset the hashtag form, removing it from future searches
+//
+function on_hashtag_form_reset()
+{
+    window.active_tags = [];
+    $('#hashtags').val('');
 }
 
 //
