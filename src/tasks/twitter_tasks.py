@@ -13,8 +13,8 @@ __all__ = (
 TWITTER_CFG_PATH = '/etc/bouzouki/twitter_auth.json'
 
 
-@app.task(ignore_result=True)
-def task_read_stream_from_twitter():
+@app.task(ignore_result=True, bind=True)
+def task_read_stream_from_twitter(self):
     cfg = None
     try:
         config_file = open(TWITTER_CFG_PATH, 'r')
