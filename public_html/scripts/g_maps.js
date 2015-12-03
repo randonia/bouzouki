@@ -37,7 +37,6 @@ function init_map() {
 
     // Initialize some listeners for the map
     map.addListener('dragend', on_map_drag_end);
-    map.addListener('zoom_changed', on_map_zoom_changed);
 
     // Give a global markers list for persistent marker storage
     window.markers = [];
@@ -52,12 +51,4 @@ function init_map() {
 function on_map_drag_end()
 {
     get_location_tweets(map.getCenter().lat(), map.getCenter().lng(), map.zoom, on_location_result);
-}
-
-//
-// Event listener for when the zoom of a map changes
-//
-function on_map_zoom_changed()
-{
-    console.log(map.zoom);
 }
