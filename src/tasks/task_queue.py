@@ -15,6 +15,8 @@ app = Celery('tasks',
              broker=CONFIG['broker'],
              include=['tasks.twitter_tasks'])
 
+# Give it a task to run
+app.send_task('tasks.twitter_tasks.task_read_stream_from_twitter')
 
 # Set a non-timeout configuration
 app.conf.update(

@@ -34,6 +34,8 @@ def task_read_stream_from_twitter():
     api = tweepy.API(auth)
 
     stream_listener = CoordinateIndexingStreamListener()
-    stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
-
-    stream.sample()
+    try:
+        stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
+        stream.sample()
+    except Error as exc:
+        raise self.retry(exc=exc)
