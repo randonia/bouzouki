@@ -45,7 +45,7 @@ body {
     margin: 30px 10px 10px 10px;
     padding: 2px 2px 2px 2px;
     overflow-y: scroll;
-    height: 500px;
+    height: 650px;
     width: calc(100% - 700px - 20px);
 }
 
@@ -95,6 +95,12 @@ body {
 
 .bg-dark {
     background: #16262D;
+}
+
+.footer {
+    color: #ffffff;
+    font-size: 0.65em;
+    text-align: center;
 }
 
 .grid {

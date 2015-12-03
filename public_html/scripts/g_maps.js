@@ -27,7 +27,10 @@ function init_map() {
     // Add a bit of fun, provide random POI to start with
     var rnd_poi = [
 	{lat: 51.9965, lng: 0.7428},
-	{lat: -6.12348, lng: 106.65177}
+	{lat: -6.12348, lng: 106.65177},
+	{lat: 37.4996949, lng: -122.2620496},
+	{lat: 47.609722, lng: -122.333056},
+	{lat: 48.8048077, lng: 2.1182443}
     ]
     map = new google.maps.Map(document.getElementById('map'), {
 	center: rnd_poi[Math.floor(Math.random() * rnd_poi.length)],

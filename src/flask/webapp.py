@@ -164,10 +164,11 @@ def get_tweet_feed():
             terms_update = {'terms': {'hashtags': hashtags_to_search}}
             body_must['must'].append(terms_update)
 
-        result = g.es.search(index='tweets', size=15, body=search_body)
+        # This really should be paginated using from_
+        result = g.es.search(index='tweets', size=250, body=search_body)
         hits = [build_hit(hit) for hit in result['hits']['hits']]
 
-    return make_response({'hits': hits})
+    return make_response({'hits': hits, '_took': result['took']})
 
 
 @app.route('/indices', methods=['DELETE'])

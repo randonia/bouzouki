@@ -34,7 +34,9 @@ function on_location_result(data)
 	// Should use Google's map url, but it's safer to load from our own host
 	//var icon_root = 'http://maps.google.com/mapfiles/kml/paddle/';
 	var icon_root = 'images/icon';
-	var icon_image_url = icon_root + String.fromCharCode(65 + i) +'.png';
+	// Prevent too many large pins from being displayed
+	var icon_id = ((i <= 25) ? String.fromCharCode(65 + i) : '_none');
+	var icon_image_url = icon_root + icon_id +'.png';
 
 	// Construct the DOM element for a tweet
 	var li = $('<li>', {class:  'li-tweet ' + bg_choices[i % 2]}).appendTo('#feed-list');
@@ -64,6 +66,10 @@ function on_location_result(data)
 	});
 	new_marker.setMap(map);
 	window.markers.push(new_marker);
+
+	// Update the footer text
+	$('#footer').empty();
+	$('#footer').append('Took ' + data['_took'] + 'ms');
     }
 }
 
