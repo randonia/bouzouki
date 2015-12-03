@@ -5,6 +5,7 @@ from flask import (Flask, request, session, redirect, url_for, abort,
                    flash, jsonify, g)
 
 import json
+import re
 
 DEBUG = __name__ == '__main__'
 ES_CFG_PATH = '/etc/bouzouki/elasticsearch.json'
@@ -91,15 +92,29 @@ def parse_request_args(args):
     return (lat, lon, precision), geo_hash
 
 
+def get_hashtags_args(args):
+    """
+    Helper function to take an request dictionary and extract the hashtags
+    using regular expressions
+    """
+    query = args.get('hashtags', '')
+    hashtag_finder = r'#\w\w+'
+    # Chop off the opening '#' symbol via lambda
+    return map(lambda tag: tag[1:], re.findall(hashtag_finder, query))
+
+
 @app.route('/tweet_feed', methods=['GET'])
 def get_tweet_feed():
     """
     Tweet Feed just provides the 15 most recent tweets if no parameters are
     passed in, otherwise provides locational tweets.
     """
-    hits = {}
+    hits = []
     search_body = None
+    # Process the parameters
     geo_params, geo_hash = parse_request_args(request.args)
+
+    # Enforce mandatory geographic information
     if None not in geo_params or geo_hash is not None:
         geo = None
         precision = None
@@ -110,15 +125,24 @@ def get_tweet_feed():
             lat, lon, precision = map(float, geo_params)
             precision = '%skm' % int(precision)
             geo = geohash.encode(lat, lon, 5)
+
+        body_must = {
+            'must': [
+                {
+                    'geo_distance': {
+                        'geo': geo,
+                        'neighbors': True,
+                        'distance': precision
+                        }
+                    }
+                ]
+            }
+
         search_body = {
             'query': {
                 'filtered': {
                     'filter': {
-                        'geo_distance': {
-                            'geo': geo,
-                            'neighbors': True,
-                            'distance': precision
-                            }
+                        'bool': body_must
                         }
                     }
                 },
@@ -133,8 +157,16 @@ def get_tweet_feed():
                     }
                 ]
             }
-    result = g.es.search(index='tweets', size=15, body=search_body)
-    hits = [build_hit(hit) for hit in result['hits']['hits']]
+
+        # Add in any hashtags
+        hashtags_to_search = get_hashtags_args(request.args)
+        if len(hashtags_to_search) > 0:
+            terms_update = {'terms': {'hashtags': hashtags_to_search}}
+            body_must['must'].append(terms_update)
+
+        result = g.es.search(index='tweets', size=15, body=search_body)
+        hits = [build_hit(hit) for hit in result['hits']['hits']]
+
     return make_response({'hits': hits})
 
 

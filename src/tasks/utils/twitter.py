@@ -1,5 +1,6 @@
 from elasticsearch import Elasticsearch
 from Geohash import geohash
+import re
 import tweepy
 
 
@@ -13,10 +14,15 @@ class CoordinateIndexingStreamListener(tweepy.StreamListener):
         self.es = Elasticsearch()
         self.PRECISION = 9
 
+    def detect_hashtags(self, text):
+        r_hashtag_finder = r'#\w\w+'
+        return re.findall(r_hashtag_finder, text)
+
     def on_status(self, status):
         if status.coordinates:
             lon, lat = status.coordinates['coordinates']
             author = status.author
+            hashtags = self.detect_hashtags(status.text)
             payload = {
                 'author': {
                     'avatar_url': author.profile_image_url,
@@ -30,6 +36,7 @@ class CoordinateIndexingStreamListener(tweepy.StreamListener):
                 'num_retweets': status.retweet_count,
                 'source_url': status.source_url,
                 'id': status.id_str,
-                'date': status.timestamp_ms
+                'date': status.timestamp_ms,
+                'hashtags': hashtags
             }
             self.es.index(index='tweets', doc_type='tweets', body=payload)
