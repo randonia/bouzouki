@@ -124,7 +124,7 @@ def get_tweet_feed():
                         'geohash_cell': {
                             'geo': geo,
                             'neighbors': True,
-                            'precision': '5km'
+                            'precision': 4
                             }
                         }
                     }
