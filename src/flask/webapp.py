@@ -94,13 +94,18 @@ def parse_request_args(args):
 
 def get_hashtags_args(args):
     """
-    Helper function to take an request dictionary and extract the hashtags
-    using regular expressions
+    Helper function to take an request dictionary and extract the
+    hashtag-specific url paramaters
     """
     query = args.get('hashtags', '')
+    # Match against several kinds of trueness
+    is_local_only = (args.get('local_tags_only', False)
+                     in [True, 'true', 'True', 1, '1'])
     hashtag_finder = r'#\w\w+'
     # Chop off the opening '#' symbol via lambda
-    return map(lambda tag: tag[1:], re.findall(hashtag_finder, query))
+    detected_tags = map(lambda tag: tag[1:], re.findall(hashtag_finder, query))
+
+    return detected_tags, is_local_only
 
 
 @app.route('/tweet_feed', methods=['GET'])
@@ -113,7 +118,6 @@ def get_tweet_feed():
     search_body = None
     # Process the parameters
     geo_params, geo_hash = parse_request_args(request.args)
-
     # Enforce mandatory geographic information
     if None not in geo_params or geo_hash is not None:
         geo = None
@@ -121,6 +125,7 @@ def get_tweet_feed():
         # prioritize the geo_hash if its passed in
         if geo_hash is not None:
             geo = geo_hash
+            precision = len(geo)
         else:
             lat, lon, precision = map(float, geo_params)
             precision = '%skm' % int(precision)
@@ -159,16 +164,25 @@ def get_tweet_feed():
             }
 
         # Add in any hashtags
-        hashtags_to_search = get_hashtags_args(request.args)
+        hashtags_to_search, local_search_only = get_hashtags_args(request.args)
         if len(hashtags_to_search) > 0:
             terms_update = {'terms': {'hashtags': hashtags_to_search}}
             body_must['must'].append(terms_update)
+            # If we're not doing a local search for tags, remove geo filter
+            print 'must before ', body_must
+            if not local_search_only:
+                for must_condition in body_must['must']:
+                    if 'geo_distance' in must_condition:
+                        print 'Removing'
+                        body_must['must'].remove(must_condition)
+            print 'must after ', body_must
 
         # This really should be paginated using from_
         result = g.es.search(index='tweets', size=250, body=search_body)
         hits = [build_hit(hit) for hit in result['hits']['hits']]
 
-    return make_response({'hits': hits, '_took': result['took']})
+        return make_response({'hits': hits, '_took': result['took']})
+    return make_response({'hits': []})
 
 
 @app.route('/indices', methods=['DELETE'])
@@ -177,7 +191,9 @@ def clear_all_indices():
     Solely for debugging. Only active if DEBUG mode is on. This will call the
     necessary cleanup and reinitialization steps
     """
-    if DEBUG:
+    # Remove 'and False' to re-enable this. Added as a failsafe to
+    # prevent index deletion
+    if DEBUG and False:
         reset_application()
         return jsonify({'message': 'success'})
     abort(403)

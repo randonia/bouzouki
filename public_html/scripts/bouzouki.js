@@ -137,7 +137,11 @@ function get_location_tweets(lat, lon, callback)
     precision = Math.round((precision) ? precision : 30);
     // Stringify the active tags to make life easier
     var hashtag_string = (window.active_tags) ? window.active_tags.toString() : '';
-    var params = $.param({'lat':lat, 'lon': lon, 'precision': precision, 'hashtags': hashtag_string});
+    var params = $.param({'lat':lat, 'lon': lon,
+			  'precision': precision,
+			  'hashtags': hashtag_string,
+			  'local_tags_only': $('#checkbox-local-only').prop('checked')
+			 });
     // Firefox Fix
     var url = ((window.location.origin) ? window.location.origin : '') + '/api/tweet_feed?' + params;
     $.get(url, callback);

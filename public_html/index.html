@@ -20,8 +20,10 @@
     <div id="hashtag-div" style="padding-top:10px">
       <form id="hashtag-search-form" class="lat-lon-form" action="javascript:on_hashtag_form_submit();">
 	Enter hashtags to search:<input type="text" id="hashtags" />
+
 	<input type="submit" value="Filter #hashtags" />
 	<input type="reset" value="Clear Filter" onClick="javascript:on_hashtag_form_reset();"/>
+	Local only? <input type="checkbox" id="checkbox-local-only" label="Local Results Only" value="false"/>
 	<br>
 	<em style="font-size: 0.8em">Enter as many hashtags as you would like, including the '#' symbol, separated by spaces or commas. Non-hashtags are filtered out</em>
       </form>
