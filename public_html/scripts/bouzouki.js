@@ -182,7 +182,7 @@ function trim(val){
 // Helper for filter function - detects if it is a hashtag
 //
 function is_hashtag(val){
-    return val.length > 0 && val.startsWith('#');
+    return val.length > 0 && val[0] == '#';
 }
 
 //
