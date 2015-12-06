@@ -88,8 +88,7 @@ def parse_request_args(args):
     lat = args.get('lat', None)
     lon = args.get('lon', None)
     precision = args.get('precision', None)
-    geo_hash = args.get('geo_hash', None)
-    return (lat, lon, precision), geo_hash
+    return (lat, lon, precision)
 
 
 def get_hashtags_args(args):
@@ -108,6 +107,16 @@ def get_hashtags_args(args):
     return detected_tags, is_local_only
 
 
+def get_precision_from_raw(precision_raw):
+    # This isn't very clean but not knowing anything but the rough radius
+    # means converting using messy conversions just using widths in kilometers
+    precision_values = [5009, 1252, 156, 39, 3.9, 1.2, 0.152]
+    for index, precision in enumerate(precision_values):
+        if precision_raw > precision:
+            return index
+    return len(precision_values)
+
+
 @app.route('/tweet_feed', methods=['GET'])
 def get_tweet_feed():
     """
@@ -117,69 +126,86 @@ def get_tweet_feed():
     hits = []
     search_body = None
     # Process the parameters
-    geo_params, geo_hash = parse_request_args(request.args)
+    geo_params = parse_request_args(request.args)
     # Enforce mandatory geographic information
-    if None not in geo_params or geo_hash is not None:
-        geo = None
-        precision = None
-        # prioritize the geo_hash if its passed in
-        if geo_hash is not None:
-            geo = geo_hash
-            precision = len(geo)
-        else:
-            lat, lon, precision = map(float, geo_params)
-            precision = '%skm' % int(precision)
-            geo = geohash.encode(lat, lon, 5)
+    if None not in geo_params:
+        lat, lon, precision_raw = map(float, geo_params)
+        precision = get_precision_from_raw(precision_raw)
+        geo = geohash.encode(lat, lon, precision)
 
-        body_must = {
-            'must': [
-                {
-                    'geo_distance': {
-                        'geo': geo,
-                        'neighbors': True,
-                        'distance': precision
-                        }
+        # The sorting - root.sort
+        sorting_terms_array = [
+            {
+                '_geo_distance': {
+                    'geo': {
+                        'lat': lat,
+                        'lon': lon
+                        },
+                    'order': 'asc',
+                    'unit': 'km',
+                    'distance_type': 'plane'
                     }
-                ]
-            }
+                }
+            ]
 
-        search_body = {
-            'query': {
-                'filtered': {
-                    'filter': {
-                        'bool': body_must
-                        }
-                    }
-                },
-            'sort': [
-                {
-                    '_geo_distance': {
-                        'geo': geo,
-                        'order': 'asc',
-                        'unit': 'km',
-                        'distance_type': 'plane'
-                        }
-                    }
-                ]
-            }
+        # The list of should matches - root.query.filtered.query.bool.should
+        # The array of OR'd hashtags to support multi-tag search
+        tag_should_array = []
 
         # Add in any hashtags
         hashtags_to_search, local_search_only = get_hashtags_args(request.args)
         if len(hashtags_to_search) > 0:
-            terms_update = {'terms': {'hashtags': hashtags_to_search}}
-            body_must['must'].append(terms_update)
-            # If we're not doing a local search for tags, remove geo filter
-            if not local_search_only:
-                for must_condition in body_must['must']:
-                    if 'geo_distance' in must_condition:
-                        body_must['must'].remove(must_condition)
+            # Append every hashtag into the should array
+            tag_should_array += [{'match': {'hashtags': tag}}
+                                 for tag in hashtags_to_search]
+
+        # The query - root.query.filtered.query
+        # Used for querying hashtags.
+        body_query = {
+            'bool': {
+                'should': tag_should_array
+                }
+            }
+
+        # The filter - root.query.filtered.filter
+        # Filtering using geohash_cell
+        body_filter = {
+            'geohash_cell': {
+                'geo': {
+                    'lat': lat,
+                    'lon': lon
+                    },
+                'precision': precision,
+                'neighbors': True
+                }
+            }
+
+        # Clear the body filter if we should only be parsing local searches
+        restrict_search = len(hashtags_to_search) > 0 and local_search_only or\
+            len(hashtags_to_search) == 0
+
+        if not restrict_search:
+            body_filter = {}
+
+        search_body = {
+            'sort': sorting_terms_array,
+            'query': {
+                'filtered': {
+                    'filter': body_filter,
+                    'query': body_query
+                    }
+                }
+            }
 
         # This really should be paginated using from_
         result = g.es.search(index='tweets', size=250, body=search_body)
         hits = [build_hit(hit) for hit in result['hits']['hits']]
 
-        return make_response({'hits': hits, '_took': result['took']})
-    return make_response({'hits': []})
+        return make_response({'_count': len(hits), '_took': result['took'],
+                              'hits': hits})
+
+    # if we have bad geo params, give back nothing
+    return make_response({'hits': [], '_took': 0})
 
 
 @app.route('/indices', methods=['DELETE'])
