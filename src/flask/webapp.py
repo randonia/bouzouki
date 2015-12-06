@@ -172,7 +172,6 @@ def get_tweet_feed():
             if not local_search_only:
                 for must_condition in body_must['must']:
                     if 'geo_distance' in must_condition:
-                        print 'Removing'
                         body_must['must'].remove(must_condition)
 
         # This really should be paginated using from_
