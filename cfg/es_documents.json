@@ -10,7 +10,7 @@
 	    "avatar_url": {"type": "string"}
 	    }
 	},
-        "geo":          {"type": "geo_point", "getohash": true, "geohash_prefix": "True", "geohash_precision": "9"},
+        "geo":          {"type": "geo_point", "geohash": true, "geohash_prefix": "True", "geohash_precision": "9"},
         "text":         {"type": "string"},
         "num_retweets": {"type": "integer"},
         "source_url":   {"type": "string"},
