@@ -169,13 +169,11 @@ def get_tweet_feed():
             terms_update = {'terms': {'hashtags': hashtags_to_search}}
             body_must['must'].append(terms_update)
             # If we're not doing a local search for tags, remove geo filter
-            print 'must before ', body_must
             if not local_search_only:
                 for must_condition in body_must['must']:
                     if 'geo_distance' in must_condition:
                         print 'Removing'
                         body_must['must'].remove(must_condition)
-            print 'must after ', body_must
 
         # This really should be paginated using from_
         result = g.es.search(index='tweets', size=250, body=search_body)
